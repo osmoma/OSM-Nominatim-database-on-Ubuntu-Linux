@@ -1,7 +1,7 @@
 # OSM Nominatim database on Ubuntu Linux 24.10 and 25.04.
 Small bash-scripts that install Nominatim database and user interface for OSM, Open Street Map - on Ubuntu Linux.
 
-**The bash-scripts are:
+**The bash-scripts are:**    
 00-nominatim-vars.sh  
 00-prep-nominatim-env.sh  
 00-reindex-nominatim-db.sh  
