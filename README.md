@@ -1,7 +1,7 @@
 # OSM Nominatim database on Ubuntu Linux 25.04.
 Small bash-scripts that install Nominatim database and user interface for OSM, Open Street Map (data) - on Ubuntu Linux.  
 These scripts do not install "map tiles" themselves. Tiles are a dfferent matter.
-The tile layers come from https://tile.openstreetmap.org/{z}/{x}/{y}.png.
+The tile layers (in the web-interface) come from https://tile.openstreetmap.org/{z}/{x}/{y}.png.
 
 **The bash-scripts are:**    
 00-nominatim-vars.sh  
