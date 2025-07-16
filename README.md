@@ -1,5 +1,5 @@
 # OSM Nominatim database on Ubuntu Linux 25.04.
-Small bash-scripts that install Nominatim database and user interface for OSM, Open Street Map (data) - on Ubuntu Linux.
+Small bash-scripts that install Nominatim database and user interface for OSM, Open Street Map (data) - on Ubuntu Linux.  
 These scripts do not install "map tiles" themselves. Tiles are a dfferent matter.
 The tile layers come from https://tile.openstreetmap.org/{z}/{x}/{y}.png.
 
@@ -21,19 +21,18 @@ The tile layers come from https://tile.openstreetmap.org/{z}/{x}/{y}.png.
 09-check-installation.sh  
 10-update-data.sh
 
-99-remove-nominatim.sh  
----------------------------
+99-remove-nominatim.sh   
 
-Notice.
+Notice.  
 This is my first attempt at installing OSM data and Nominatim.
 I have done this work on Ubuntu Linux 25.04.
 I hope you'll get some inspiration from my effort.
 
-Download the bash scripts and make them executable.
+Download the bash scripts and make them executable.  
 $ chmod +x *.sh
 
-Check the variables in "00-nominatim-vars.sh" and run the scripts sequentially from 01 to 10.
-$ ./01-prepare-system.sh 
-...
+Check the variables in "00-nominatim-vars.sh" and run the scripts sequentially from 01 to 10.  
+$ ./01-prepare-system.sh  
+...  
 
 The "99-remove-nominatim.sh" script will delete/wipe out Postgres and its databases + Nominatim!
