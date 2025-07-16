@@ -23,7 +23,7 @@ The tile layers (in the Nominatim web-interface) come from https://tile.openstre
 
 99-remove-nominatim.sh   
 
-Notice.  
+Notice.  EDIT: Number of tabs (\t) in the scripts are not consistent. Sorry for that.
 This is my first attempt at installing OSM data and Nominatim.
 I have done this work on Ubuntu Linux 25.04.
 I hope you'll get some inspiration from my effort.
@@ -36,3 +36,5 @@ $ ./01-prepare-system.sh
 ...  
 
 The "99-remove-nominatim.sh" script will delete/wipe out Postgres and its databases + Nominatim!
+  
+**EDIT:** Number of tabs (\t) in the scripts are not consistent. Sorry for that.
