@@ -23,7 +23,7 @@ The tile layers (in the Nominatim web-interface) come from https://tile.openstre
 
 99-remove-nominatim.sh   
 
-Notice.  EDIT: Number of tabs (\t) in the scripts are not consistent. Sorry for that.
+Notice.  
 This is my first attempt at installing OSM data and Nominatim.
 I have done this work on Ubuntu Linux 25.04.
 I hope you'll get some inspiration from my effort.
