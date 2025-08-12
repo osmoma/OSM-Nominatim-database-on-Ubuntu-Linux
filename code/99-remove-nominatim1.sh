@@ -35,7 +35,7 @@ dropdb --host=localhost --username=nominatim --password --force nominatim
 
 echo
 echo "Deleting packages and directories. (need password for root or sudo)"
-sudo apt-get remove --purge -y	postgresql-* postgresql-client-* postgresql-contrib-* \
+sudo apt-get remove --purge -y  postgresql-* postgresql-client-* postgresql-contrib-* \
         postgresql-server-dev-* postgresql-postgis* postgis postgis-doc
 
 sudo rm -frd /usr/lib/postgresql
@@ -45,19 +45,19 @@ sudo rm /etc/systemd/system/nominatim*
 #sudo rm -fr /etc/postgresql
 
 if [ ! -z "$PROJECT_WEBSITE" -a ${#PROJECT_WEBSITE} -gt 4 ]; then
-	sudo rm -fr "$PROJECT_WEBSITE"
+  sudo rm -fr "$PROJECT_WEBSITE"
 fi
 
 if [ ! -z "$PROJECT_DIR" -a ${#PROJECT_DIR} -gt 4 ]; then
-	sudo rm -fr "$PROJECT_DIR"
+  sudo rm -fr "$PROJECT_DIR"
 fi
 
 if [ ! -z "$USERNAME" -a ${#USERNAME} -gt 4 ]; then  
-	sudo userdel -rf "$USERNAME"
+  sudo userdel -rf "$USERNAME"
 fi
 
 if [ ! -z "$USERHOME" -a ${#USERHOME} -gt 4 ]; then
-	sudo rm -fr "$USERHOME"
+  sudo rm -fr "$USERHOME"
 fi
 
 sudo apt-get remove -y --purge apache2* apache2-data* libapache2-mod-wsgi-py3

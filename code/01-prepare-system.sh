@@ -11,19 +11,19 @@ source "$MY_PATH/00-utility.sh"
 check_if_root_super;
 
 function prepare_system() {
-	echo_step "Your system is $(lsb_release -a)."
+  echo_step "Your system is $(lsb_release -a)."
 
-	# Update system
-	echo "Updating system."		
-	
-	apt-get -q -y update; apt-get -q -y upgrade; apt-get -q -y autoremove
-	
-	# Install some necessities
-	apt-get install -q -y osm2pgsql pkg-config libicu-dev virtualenv pyosmium 
-	apt-get install -q -y wget aria2 unzip pwgen gawk git tree curl 
-	
-	echo 
-	echo_step "System update done."
+  # Update system
+  echo "Updating system."         
+
+  apt-get -q -y update; apt-get -q -y upgrade; apt-get -q -y autoremove
+
+  # Install some necessities
+  apt-get install -q -y osm2pgsql pkg-config libicu-dev virtualenv pyosmium 
+  apt-get install -q -y wget aria2 unzip pwgen gawk git tree curl 
+
+  echo 
+  echo_step "System update done."
 }
 
 prepare_system;

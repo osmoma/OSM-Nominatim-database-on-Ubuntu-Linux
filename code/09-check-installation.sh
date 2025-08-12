@@ -22,8 +22,9 @@ echo_step "Check nominatim database." >&1
 echo_step "****************************************************" >&1
 
 su - nominatim<<END_CMD
-	# Check nominatim database 
-	nominatim admin --check-database
+  # Check nominatim database 
+  nominatim admin --check-database
+  nominatim status 
 END_CMD
 
 echo_step "****************************************************" >&1
@@ -47,18 +48,30 @@ echo_step "****************************************************" >&1
 # Kill existing server (the port is normally 8088)
 # sudo lsof -t -i tcp:8088 | xargs kill -9 2>&1 1>/dev/null
 for PID in $(sudo lsof -t -i tcp:8088); do
-	echo "Kill nominatim serve, PID:$PID"
-	kill -9 "$PID" 1>&2 2>/dev/null
+  echo "Kill nominatim serve, PID:$PID"
+  kill -9 "$PID" 1>&2 2>/dev/null
 done
 
 # Start a new one
 (su - nominatim<<END_CMD
-  # Start a small web server that normally listens on http://127.0.0.1:8088. 
+  echo "Test the Nominatim search mechanism:"
+  echo "Trying to start a small test-server (see: nominatim serve --help)."
+  echo "Open the URL in your browser (normally  http://127.0.0.1:8088)."
+  echo 
+  echo "Do some tests similar to these:"
+  echo "http://127.0.0.1:8088/status"
+  echo "http://127.0.0.1:8088/search?city=Lisbon"
+  echo "http://127.0.0.1:8088/search?country=finland&city=helsinki"
+  echo "http://127.0.0.1:8088/search?q=lisbon"
+  echo 
+  echo "See: https://nominatim.org/release-docs/latest/api/Search/"
+
   # nominatim serve --server 127.0.0.1:1337
   nominatim serve
 END_CMD
 )&
 
+echo 
 echo_step "Check web access. Expecting status 'OK'">&1
 echo_step "Open the following link in your browser;" >&1
 echo "http://localhost/nominatim/status"

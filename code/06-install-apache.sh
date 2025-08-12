@@ -35,38 +35,38 @@ ACCESS_ALL="
 "
 
 function install_apache() {
-	mkdir $PROJECT_DIR 2>/dev/null
-	
-	apt-get install -y -q apache2 
-	a2enmod proxy_http
+  mkdir $PROJECT_DIR 2>/dev/null
 
-	echo
-	do_peep 3 
-	echo_step "Now defining \"/etc/apache2/conf-available/nominatim.conf\" file." 
-	echo 
-	echo_step "Do you want restrict access to your Nominatim/Postgres database for localhost and local net only?"
-	echo_step "If you restrict, then only localhost (127.0.0.1) and your local intranet (198.168.X.X) can access the data."
-	echo "  You could then only do requests like:"
-	echo "  http://localhost/search.html?city=porto&country=portugal"
-	echo "  http://127.0.0.1/search.html?q=lisbon"
-	echo "  or by using wget, curl:"
-	echo "  curl http://$HOSTNAME/nominatim/search?country=portugal" 
-	echo 
-	
-	ask_yes_no "Restrict access? Give access to localhost and local intranet only. Block outsiders? Yes/No?" "true"
-	# Notice: ask_yes_no returns value in $FN_RETURN_VAL variable!
- # Test $FN_RETURN_VAL.
-  
-	ACCESS_TXT=""
-	if [ "$FN_RETURN_VAL" == "Y" ]; then 
-		ACCESS_TXT=$ACCESS_LOCAL_ONLY
-	else
-		ACCESS_TXT=$ACCESS_ALL
-	fi
-	
-	cat >/etc/apache2/conf-available/nominatim.conf <<CMD_EOF
+  apt-get install -y -q apache2 
+  a2enmod proxy_http
+
+  echo
+  do_peep 3 
+  echo_step "Now defining \"/etc/apache2/conf-available/nominatim.conf\" file." 
+  echo 
+  echo_step "Do you want restrict access to your Nominatim/Postgres database for localhost and local net only?"
+  echo_step "If you restrict, then only localhost (127.0.0.1) and your local intranet (198.168.X.X) can access the data."
+  echo "  You could then only do requests like:"
+  echo "  http://localhost/search.html?city=porto&country=portugal"
+  echo "  http://127.0.0.1/search.html?q=lisbon"
+  echo "  or by using wget, curl:"
+  echo "  curl http://$HOSTNAME/nominatim/search?country=portugal" 
+  echo 
+
+  ask_yes_no "Restrict access? Give access to localhost and local intranet only. Block outsiders? Yes/No?" "true"
+  # Notice: ask_yes_no returns value in $FN_RETURN_VAL variable!
+  # Test $FN_RETURN_VAL.
+
+  ACCESS_TXT=""
+  if [ "$FN_RETURN_VAL" == "Y" ]; then 
+    ACCESS_TXT=$ACCESS_LOCAL_ONLY
+  else
+    ACCESS_TXT=$ACCESS_ALL
+  fi
+        
+ cat >/etc/apache2/conf-available/nominatim.conf <<CMD_EOF
 <VirtualHost *:80>
- ProxyPass /nominatim "unix:$USERHOME/nominatim.sock|http://localhost/"
+ ProxyPass /nominatim "unix:/run/nominatim.sock|http://localhost/"
 
  # You may change these values.
  # Add server alias "nominatim.com"
@@ -86,7 +86,7 @@ function install_apache() {
  # DirectoryIndex search.html search.php
  # Require all granted
  #</Directory>
-	
+        
  $ACCESS_TXT
 
  alias /nominatim $PROJECT_WEBSITE
@@ -98,23 +98,21 @@ function install_apache() {
 </VirtualHost>
 CMD_EOF
 
-	#setfacl -R -m u:www-data:rx $USERHOME
-	chown $USERNAME:www-data $PROJECT_WEBSITE -R
+  #setfacl -R -m u:www-data:rx $USERHOME
+  chown $USERNAME:www-data $PROJECT_WEBSITE -R
 
-	# Disable/enable configuration file
-	a2disconf nominatim
-	a2enconf nominatim
+  # Disable/enable configuration file
+  a2disconf nominatim
+  a2enconf nominatim
 
-	# Restart apache2
-	systemctl restart apache2
-	
-	echo "Done."
+  # Restart apache2 and Postgres
+  systemctl restart apache2
+  systemctl restart postgresql
+  
+  echo "Done."
 }
 
 install_apache;
-
-
-
 
 
 
