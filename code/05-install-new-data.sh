@@ -123,15 +123,46 @@ function nominatim_import_new_data() {
    # To MB
    MEM_AVAIL=$(( MEM_AVAIL/1000 ))
    # ------------------------------------
-         
-   # Import and update commands
-   # nominatim import ...
-   # (assuming that "nominatim" program is in $PATH of nominatim user)
-   IMPORT_CMD="nominatim import -j ${NUM_THREADs} --osm2pgsql-cache ${MEM_AVAIL} --project-dir ${PROJECT_DIR}"
+   
+   unset NOMINATIM_DB_EXIST
+   NOMINATIM_DB_EXIST=$(psql --dbname=nominatim -U postgres -XtA -c "SELECT 1 FROM place LIMIT 1;" 2>/dev/null)
+   
+   if [ ! -z "$NOMINATIM_DB_EXIST" ]; then
+     echo 
+     echo_step "Postgres database NOMINATIM already exist." 
+  
+     # List of already imported region/countries
+     DB_HAS_COUNTRIES=$(psql --dbname=nominatim -U postgres -c "SELECT DISTINCT A.country_code as Country_code, B.name -> 'name' as Name FROM location_area_country as A, country_name as B WHERE A.country_code=B.country_code order by A.country_code;")
 
-   # Count number of new imports
+     if [ ! -z "$DB_HAS_COUNTRIES" ]; then
+       echo "Database has these regions/countries:"
+       echo "$DB_HAS_COUNTRIES"
+     fi
+    
+     echo_step "Adding new region/countries to the database (nominatim add-data...)."
+     ask_yes_no "Is this OK? Reply Yes/No:"
+    
+     # Will execute nominatim add-data for each file...
+     IMPORT_CMD="nominatim add-data -j ${NUM_THREADs} --osm2pgsql-cache ${MEM_AVAIL} --project-dir ${PROJECT_DIR}"
+     IMPORT_PARM="--file"
+   else
+     echo 
+     echo_step "Postgres database NOMINATIM DOES NOT exist." 
+     echo_step "Creating a new database, importing new data (nominatim import...)."
+     ask_yes_no "Is this OK? Reply Yes/No:"
+    
+     # Will execute nominatim import for each file...
+     IMPORT_CMD="nominatim import -j ${NUM_THREADs} --osm2pgsql-cache ${MEM_AVAIL} --project-dir ${PROJECT_DIR}"
+     IMPORT_PARM="--osm-file"
+   fi
+
+   # Count imported files
    IMPORT_COUNT=0
 
+   # If need to re-index database after OSM-data and wikidata imports? (0=false, 1=true)
+   DO_REINDEX_DB=0
+   
+   # --------------------------LOOP START --------------------------------
    # Loop through region/country list. Items are separated by spaces (or ,)
    IFS=$' ,'
    for COUNTRY in $COUNTRIES; do
@@ -140,7 +171,7 @@ function nominatim_import_new_data() {
      # $COUNTRY
      # Eg. "europe/andorra", or "africa", "europe", "planet", etc.
      echo 
-     echo_step "Processing region/country $COUNTRY." >&1
+     echo_step "Processing region/country: $COUNTRY." >&1
 
      # Eg. "planet", "europe", "asia" or ""
      PART_1=$(dirname "$COUNTRY")
@@ -179,6 +210,9 @@ function nominatim_import_new_data() {
      #if ! test -f "${LOCAL_DIR}/${LOCAL_FILE}"; then
       echo
       echo_step "Now downloading $DL_URL --> ${LOCAL_DIR}/${LOCAL_FILE}"
+      
+      # Remove existing file
+      rm "${LOCAL_DIR}/${LOCAL_FILE}" 2>/dev/null
 
       RES=$(download_from_mirror "$LOCAL_DIR" "$DL_URL")   
 
@@ -204,8 +238,8 @@ function nominatim_import_new_data() {
      # Get changes
      pyosmium-get-changes -O "${LOCAL_DIR}/${LOCAL_FILE}" -f "${PROJECT_DIR}/${COUNTRY}/sequence.state" --size 500 -vvv
 
-     # Add downloaded --osm-file (xxx.pbf) to the IMPORT_CMD 
-     IMPORT_CMD="${IMPORT_CMD} --osm-file ${LOCAL_DIR}/${LOCAL_FILE} " 
+     # Add either --osm-file xxx.pbf or --file xxx.pbf  
+     IMPORT_CMD="${IMPORT_CMD} ${IMPORT_PARM} ${LOCAL_DIR}/${LOCAL_FILE} " 
                     
      # Write the URL ($DL_SITE) to "url.txt" so updates can use it later 
      echo "$DL_SITE" > "${PROJECT_DIR}/${COUNTRY}/url.txt"
@@ -213,24 +247,32 @@ function nominatim_import_new_data() {
 
      # Count number of new imports
      IMPORT_COUNT=$((IMPORT_COUNT + 1))
+     
   done  # for COUNTRY in $COUNTRIES...
-
+  # --------------------------LOOP END --------------------------------     
 
   # Files are owned by nominatim:www-data
   chown -R ${USERNAME}:www-data ${PROJECT_DIR}
 
-  # --------------------------------------------  
-  # Import new data & create nominatim database?
-  # --------------------------------------------  
+  # ----------------------------------------------------------------------------  
+  # Import new data.
+  # If this is first import then create Nominatim database & tables.
+  # ----------------------------------------------------------------------------  
   if [ "$IMPORT_COUNT" -gt 0 ]; then
     echo
     echo_step "Importing new data:" >&1
     echo_step "$IMPORT_CMD" >&1
     echo
-                 
+    echo_step "This may take some time. Be patient, let it run..."
+    echo 
+
+    # Import/add-data                 
     su - ${USERNAME} <<CMD_EOF
      $IMPORT_CMD
 CMD_EOF
+
+    # Must re-index database (below)
+    DO_REINDEX_DB=1
   fi
 
   echo_step "*********************************************" >&1
@@ -260,27 +302,43 @@ CMD_EOF
         cd "$WIKIPEDIA_DIR"
         $WIKIPEDIA_CMD 
 CMD_EOF
-   fi
- fi
+
+    # Must re-index database (below)
+    DO_REINDEX_DB=1
+
+    fi
+  fi
+
+  # ----------------------------------------------------
+  # Re-index Nominatim database?
+  if [ "$DO_REINDEX_DB" -gt 0 ]; then
+    INDEX_CMD="nominatim index -j ${NUM_THREADs}"
+
+    echo 
+    echo_step "Reindexing database... stay tuned!"
+    
+    su - ${USERNAME} <<CMD_EOF
+      ${INDEX_CMD}
+CMD_EOF
+
+  fi
+  # ----------------------------------------------------
 
   cd ${PROJECT_DIR}
 
   chown -R ${USERNAME}:www-data ${PROJECT_DIR}
   chmod -R g+rwx "$PROJECT_DIR"
-
-  # Reindex
-  source "$MY_PATH/xx-reindex-nominatim-db.sh"
       
-   echo 
-   # Inform about the flatnode file
-   if [ -f "$NOMINATIM_FLATNODE_FILE" -a ${#NOMINATIM_FLATNODE_FILE} -gt 0 ]; then  
-     echo "Important notice."
-     echo "NOMINATIM_FLATNODE_FILE has been set and GPS co-ordinates and polygons are stored in this file."
-     echo "Do not alter or remove that file during normal operation."
-     echo 
-     FSIZE=$(stat -c "%s" "$NOMINATIM_FLATNODE_FILE")
-     echo "The file is \"$NOMINATIM_FLATNODE_FILE\" and its size is $FSIZE bytes after data import." 
-   fi
+  echo 
+  # Inform about the flatnode file
+  if [ -f "$NOMINATIM_FLATNODE_FILE" -a ${#NOMINATIM_FLATNODE_FILE} -gt 0 ]; then  
+    echo "Important notice."
+    echo "NOMINATIM_FLATNODE_FILE has been set and GPS co-ordinates and polygons are stored in this file."
+    echo "Do not alter or remove that file during normal operation."
+    echo 
+    FSIZE=$(stat -c "%s" "$NOMINATIM_FLATNODE_FILE")
+    echo "The file is \"$NOMINATIM_FLATNODE_FILE\" and its size is $FSIZE bytes after data import." 
+  fi
 
   # -----------------------------------------------
   # Show the data as tree listing
@@ -301,7 +359,7 @@ function print_info() {
   echo
   echo_step "${RED_TEXT}Important, importante:"
   echo "------------------------------------------------------------"
-  echo "Now, become nominatim user, run:"
+  echo "Now, become user \"nominatim\", and run:"
   echo "sudo -i -u nominatim"
   echo "or:"
   echo "su nominatim      # password is in /root/auth.txt"
@@ -315,8 +373,9 @@ function print_info() {
   echo "Check state of the database. (as nominatim user). It should reply \"OK\". Run:"
   echo "nominatim status"
   echo 
-  echo "Test and search:"
+  echo "Test and search (depending on data you imported):"
   echo "nominatim search --query Lisbon"
+  echo "nominatim search --query monte"
   echo "nominatim reverse --lat 51 --lon 45"
 }
 
@@ -347,13 +406,11 @@ ask_yes_no "Are these values OK? Reply Yes/No (Y/N):"
 #COUNTRY_LIST="europe/portugal europe/monaco"
 #DOWNLOAD_SITE="https://download.geofabrik.de"
 
+# Let us go:
 # Import new data. Create Postgres database for Nominatim OSM data.
 nominatim_import_new_data "$COUNTRY_LIST" "$DOWNLOAD_SITE"
 
 # Print some info
 print_info
-
-
-
 
 

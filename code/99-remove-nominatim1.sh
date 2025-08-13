@@ -52,7 +52,7 @@ if [ ! -z "$PROJECT_DIR" -a ${#PROJECT_DIR} -gt 4 ]; then
   sudo rm -fr "$PROJECT_DIR"
 fi
 
-if [ ! -z "$USERNAME" -a ${#USERNAME} -gt 4 ]; then  
+if [ ! -z "$USERNAME" ]; then  
   sudo userdel -rf "$USERNAME"
 fi
 

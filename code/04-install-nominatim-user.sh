@@ -164,8 +164,12 @@ CMD_EOF
  sudo systemctl enable nominatim.socket
  
  echo
- echo_step "${RED_TEXT}Notice!"
- echo_step "Password for user ${RED_TEXT}${USERNAME} ${WHITE_TEXT}is ${RED_TEXT}${USER_PASSWD}${WHITE_TEXT}."
+ echo
+ echo_step "${RED_TEXT}Please notice!"
+ echo "Created user:$USERNAME"
+ echo "User password: $USER_PASSWD"
+ echo "User home:$USERHOME"      
+ echo "This directory will contain downloaded data (to be processed) and update info." 
  echo_step "Passwords have been written to /root/auth.txt file. Ok?  (check that file)"
 }
 

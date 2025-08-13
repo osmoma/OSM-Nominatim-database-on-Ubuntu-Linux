@@ -29,7 +29,7 @@ CMD_EOF
 
 echo
 echo_step "*********************************************" >&1
-echo_step "Checking the Nominatim database." >&1
+echo_step "Checking the Nominatim database + its status." >&1
 echo_step "*********************************************" >&1           
 
 CHECK_DB_CMD="nominatim admin --check-database"
@@ -37,6 +37,17 @@ echo_step ${CHECK_DB_CMD} >&1
 
 su - ${USERNAME} <<CMD_EOF
  ${CHECK_DB_CMD}
+CMD_EOF
+
+echo 
+echo 
+
+CHECK_STATUS="nominatim status"
+echo "Checking status of Nominatim database. (should print \"OK\")"
+echo_step ${CHECK_STATUS} >&1
+
+su - ${USERNAME} <<CMD_EOF
+ ${CHECK_STATUS}
 CMD_EOF
 
 echo_step "Done."
