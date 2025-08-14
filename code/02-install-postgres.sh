@@ -11,6 +11,11 @@ source "$MY_PATH/00-utility.sh"
 check_if_root_super;
 
 function install_postgresql() {
+
+  # Confirm/verify versions of Postgresql, PostGIS
+  # Ask user
+  ask_about_postgres_version
+
   apt-get -q -y install postgresql-${POSTGRE_VER} osm2pgsql postgresql-${POSTGRE_VER}-postgis-${POSTGIS_VER} \
                postgresql-${POSTGRE_VER}-postgis-${POSTGIS_VER}-scripts pkg-config libicu-dev virtualenv
 
@@ -114,6 +119,22 @@ CMD_EOF
   echo "sudo -u postgres psql -c \"ALTER USER postgres PASSWORD 'new-password';\""
   echo 
   echo "Check the \"/root/auth.txt\" file."
+}
+
+function ask_about_postgres_version() {
+  #AVAIL_VERSIONS=$(apt-cache policy postgresql)
+  do_peep 3
+  echo_step "Please check the latest available versions of Postgresql and PostGIS in your Linux."
+  echo "Use commands like:"
+  echo "apt-cache search postgresql | grep -E '^postgresql-[0-9]{1,3}(-postgis-[0-9]{1,3})* '"
+  echo "apt-cache policy postgresql"
+  echo 
+  echo_step "Check and modify \"00-nominatim-vars.sh\" file."
+  echo_step "Current versions of Postgresql and PostGIS in \"00-nominatim-vars.sh\" are:"
+  echo "POSTGRE_VER=$POSTGRE_VER"
+  echo "POSTGIS_VER=$POSTGIS_VER"
+
+  ask_yes_no "Do you want to continue? Reply Yes/No:"
 }
 
 # Run the functions

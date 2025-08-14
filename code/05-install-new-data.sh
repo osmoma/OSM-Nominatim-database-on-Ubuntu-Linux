@@ -135,12 +135,13 @@ function nominatim_import_new_data() {
      DB_HAS_COUNTRIES=$(psql --dbname=nominatim -U postgres -c "SELECT DISTINCT A.country_code as Country_code, B.name -> 'name' as Name FROM location_area_country as A, country_name as B WHERE A.country_code=B.country_code order by A.country_code;")
 
      if [ ! -z "$DB_HAS_COUNTRIES" ]; then
-       echo "Database has these regions/countries:"
+       echo "Currently database has these regions/countries:"
        echo "$DB_HAS_COUNTRIES"
      fi
     
      echo_step "Adding new region/countries to the database (nominatim add-data...)."
-     ask_yes_no "Is this OK? Reply Yes/No:"
+     echo "Do you want to import/add: ${COUNTRY_LIST}?"
+     ask_yes_no "Reply Yes/No:"
     
      # Will execute nominatim add-data for each file...
      IMPORT_CMD="nominatim add-data -j ${NUM_THREADs} --osm2pgsql-cache ${MEM_AVAIL} --project-dir ${PROJECT_DIR}"
@@ -149,12 +150,28 @@ function nominatim_import_new_data() {
      echo 
      echo_step "Postgres database NOMINATIM DOES NOT exist." 
      echo_step "Creating a new database, importing new data (nominatim import...)."
-     ask_yes_no "Is this OK? Reply Yes/No:"
+     ask_yes_no "Continue? Reply Yes/No:"
     
      # Will execute nominatim import for each file...
      IMPORT_CMD="nominatim import -j ${NUM_THREADs} --osm2pgsql-cache ${MEM_AVAIL} --project-dir ${PROJECT_DIR}"
      IMPORT_PARM="--osm-file"
    fi
+
+   # Fine tune Postgres for import 
+   # ------------------------------------------------------
+   CONFIG_VARS="   
+    shared_buffers = 4GB
+    fsync = off
+    full_page_writes = off"
+
+   echo_step "Changing these Postgres settings:"
+   echo "$CONFIG_VARS"
+  
+   ask_yes_no "Do you want to apply these settings? Yes/No (Y/N):"
+   if [ "$FN_RETURN_VAL" == "Y" ]; then 
+     change_postgres_settings "$CONFIG_VARS"    
+   fi
+   # ------------------------------------------------------
 
    # Count imported files
    IMPORT_COUNT=0
@@ -353,6 +370,36 @@ CMD_EOF
   echo_step "****************************************************" >&1
   echo_step "You can delete all files in $PROJECT_DIR_TMP directory to free some disk space." 
   echo_step "****************************************************" >&1
+
+  # Reset Postgres variables 
+  # ------------------------------------------------------
+  if [ "$FN_RETURN_VAL" == "Y" ]; then 
+   CONFIG_VARS="   
+    shared_buffers = 500MB
+    fsync = on
+    full_page_writes = on"
+
+   echo_step "Resetting Postgres variables:"
+   echo "$CONFIG_VARS"
+   change_postgres_settings "$CONFIG_VARS"    
+  fi
+  # ------------------------------------------------------
+}
+
+function change_postgres_settings() {
+  # Change Postgres settings and do restart.
+  # $1 = List of configuration variables and values.
+  
+  # Find Postgresql's config file.
+  # Normally: /etc/postgresql/{VERSION}/main/postgresql.conf
+  POSTGRE_CONF=$(psql -U postgres -c 'SHOW config_file'  | grep "\.conf")
+  POSTGRE_CONF=$(echo $POSTGRE_CONF | xargs)      
+        
+  CONFIG_VARS="$1"          
+        
+  replace_file_var_list "$CONFIG_VARS" $POSTGRE_CONF "ADD" #add-var-if-missing
+  echo "Restarting Postgres."
+  systemctl restart postgresql
 }
 
 function print_info() {

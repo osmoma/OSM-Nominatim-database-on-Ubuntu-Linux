@@ -18,7 +18,8 @@ function tune_postgres_database() {
   # Normally: /etc/postgresql/17/main/postgresql.conf
   POSTGRE_CONF=$(psql -U postgres -c 'SHOW config_file'  | grep "\.conf")
   POSTGRE_CONF=$(echo $POSTGRE_CONF | xargs)      
-        
+
+  # Parameters for normal operation (not for import/add data)        
   CONFIG_VARS="   
    track_activity_query_size = 32768
    maintenance_work_mem = 10GB
@@ -26,11 +27,14 @@ function tune_postgres_database() {
    work_mem = 2GB
    synchronous_commit = off
    max_wal_size = 1GB
-   checkpoint_timeout = 20min
+   checkpoint_timeout = 10min
    checkpoint_completion_target = 0.9
    random_page_cost = 1.0
    wal_level = minimal
-   max_wal_senders = 0"
+   max_wal_senders = 0
+   shared_buffers = 1GB
+   fsync = on
+   full_page_writes = on"
    
    # During import/update, set:
    #shared_buffers = 8GB  # normally 128MB
@@ -61,4 +65,12 @@ function tune_postgres_database() {
 }
 
 tune_postgres_database;
+
+echo 
+echo "Please see:"
+echo "https://nominatim.org/release-docs/latest/admin/Installation/#tuning-the-postgresql-database"
+echo 
+do_peep 
+
+
 

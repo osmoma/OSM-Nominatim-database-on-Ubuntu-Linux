@@ -43,9 +43,9 @@ APACHE_LOG_DIR="/var/log/apache2"
 # Samples:
 #COUNTRY_LIST="planet"
 #COUNTRY_LIST="europe"
-#COUNTRY_LIST="europe/monaco europe/andorra"
+COUNTRY_LIST="europe/monaco europe/andorra"
 #COUNTRY_LIST="europe/monaco europe/portugal"
-COUNTRY_LIST="europe/finland europe/portugal"
+#COUNTRY_LIST="europe/finland europe/portugal"
 
 # Choose a download/mirror site.  
 # See: https://wiki.openstreetmap.org/wiki/Planet.osm#Planet.osm_mirrors

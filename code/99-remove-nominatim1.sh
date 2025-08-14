@@ -30,7 +30,7 @@ ask_yes_no "Are you sure? Reply Y/N:";
 # Drop nominatim db.
 # DROP SCHEMA db CASCADE; 
 # (psql -l lists all databases)
-echo "Dropping Nominatim database. (need password for nominatim user)"
+echo "Dropping Nominatim database. (need password for nominatim user, passwords are in /root/auth.txt file)"
 dropdb --host=localhost --username=nominatim --password --force nominatim
 
 echo
