@@ -8,7 +8,7 @@ source "$SELF_PATH/00-nominatim-vars.sh"
 source "$SELF_PATH/00-utility.sh"
 
 # Prepare Nominatim $PROJECT_DIR/.env
-source "$SELF_PATH/00-prep-nominatim-env.sh"
+"$SELF_PATH/00-prep-nominatim-env.sh"
 
 # Check if root or sudo user
 check_if_root_super;
@@ -197,7 +197,7 @@ function nominatim_update_data() {
 CMD_EOF
   fi
 
-  source "$SELF_PATH/00-reindex-nominatim-db.sh"
+  "$SELF_PATH/00-reindex-nominatim-db.sh"
 }
 
 nominatim_update_data;
