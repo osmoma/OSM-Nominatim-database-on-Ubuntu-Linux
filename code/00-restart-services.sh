@@ -7,23 +7,32 @@ source "$MY_PATH/00-nominatim-vars.sh"
 # Include utility functions
 source "$MY_PATH/00-utility.sh"
 
-# Check if root or sudo user
-check_if_root_super;
+function restart_services() {
+  # Check if root or sudo user
+  check_if_root_super;
 
-systemctl disable --now nominatim.socket 
-systemctl disable --now nominatim.service nominatim.socket 
+  echo "--------------------------------------"
+  echo "Restarting services, postgres, apache2, nominatim.service/nominatim.socket..."
+  echo "--------------------------------------"
 
-systemctl daemon-reload
-systemctl restart nominatim.socket
-systemctl enable nominatim.socket
-systemctl restart nominatim.service
-systemctl enable nominatim.service
+  systemctl disable --now nominatim.socket 
+  systemctl disable --now nominatim.service nominatim.socket 
 
-systemctl restart postgresql
+  systemctl daemon-reload
+  systemctl restart nominatim.socket
+  systemctl enable nominatim.socket
+  systemctl restart nominatim.service
+  systemctl enable nominatim.service
 
-a2disconf nominatim; a2enconf nominatim
-systemctl restart apache2
+  systemctl restart postgresql
 
-echo "Done."
+  a2disconf nominatim; a2enconf nominatim
+  systemctl restart apache2
+
+  echo "Done."
+}
+
+restart_services;
+
 
 

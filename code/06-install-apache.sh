@@ -17,8 +17,8 @@ ACCESS_LOCAL_ONLY="
  AddType application/json .php
  DirectoryIndex search.html search.php
 
- Require host localhost
- Require ip 127.0.0.1
+ Require local
+ #Require ip 192.168.1.0/24
  Require ip 192.168
  Require ip 10
 </Directory>
@@ -73,7 +73,7 @@ function install_apache() {
  ServerAdmin "admin@$HOSTNAME.com"
  ServerName "$HOSTNAME.com"
  ServerAlias "www.$HOSTNAME.com"
-
+ 
  # Eg. /var/www/nominatim
  DocumentRoot $PROJECT_WEBSITE
 
@@ -114,5 +114,16 @@ CMD_EOF
 
 install_apache;
 
+do_peep 4
+echo
+echo 
+echo "Notice."
+echo "I had to rename the default Apache2 \"index.html\" to something else.. "
+echo "so I can access nominatim page from my intranet (from tablets and phones via intranet 192.168.xx.xx address)."
+echo "I did:"
+echo "mv /var/www/html/index.html /var/www/html/index.old"
+echo "After that my IP 192.168.xx.xx shows the nominatim page and map."
+echo "There must be a better solution...my understanding of Apache2 config was not good enough."
+echo 
 
 

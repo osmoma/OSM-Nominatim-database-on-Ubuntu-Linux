@@ -79,7 +79,8 @@ function install_nominatim_web_web_ui() {
 
   cd $USERHOME
 
-  # echo $(hostname -f) 
+  # hostname -f    <--- = "ubuntu2504" in my case 
+  #
   # xdg-open http://${HOSTNAME}/search.html
   # xdg-open http://localhost/search.html
   # Test in browser http://ubuntu2504/search.html
@@ -89,6 +90,10 @@ function install_nominatim_web_web_ui() {
 }
 
 install_nominatim_web_web_ui;
+
+# Now, best to restart services.
+# Start nominating.service and make nominatim.socket available to the apps.
+"$MY_PATH/00-restart-services.sh" 
 
 echo 
 echo_step "Now, test Nominatim web-interface in your browser:"
@@ -102,6 +107,8 @@ echo_step "I had imported europe/monaco and europe/andorra so I do..."
 echo "http://$HOSTNAME/search?q=monaco"
 echo "http://localhost/search?q=Monte"
 echo 
+echo "Test also access from other devices in your net, "
+
 echo "See: https://nominatim.org/release-docs/latest/api/Search/" 
 
 
