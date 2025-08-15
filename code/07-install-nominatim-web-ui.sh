@@ -42,7 +42,7 @@ function install_nominatim_web_web_ui() {
   mv dist/theme/config.theme.js.example dist/theme/config.theme.js
 
   if [ -z "$HOSTNAME" ]; then 
-     HOSTNAME=$(hostname -f)
+     HOSTNAME=$(hostname)
   fi
 
   # Replace title. Notice: the line must end at ","
@@ -79,7 +79,7 @@ function install_nominatim_web_web_ui() {
 
   cd $USERHOME
 
-  # hostname -f    <--- = "ubuntu2504" in my case 
+  # hostname    <--- = "ubuntu2504" in my case 
   #
   # xdg-open http://${HOSTNAME}/search.html
   # xdg-open http://localhost/search.html
