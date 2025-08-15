@@ -55,7 +55,7 @@ COUNTRY_LIST="europe/monaco europe/andorra"
 DOWNLOAD_SITE="https://download.geofabrik.de"
 
 # Variable NOMINATIM_FLATNODE_FILE.
-# If you plan to import a large dataset (e.g. Europe, North America, the entire planet), you should also enable flatnode storage of node locations.
+# If you plan to import a large dataset (e.g. Europe, North America, the entire planet), you should also enable flatnode storage for node locations.
 # With this setting, node co-ordinates and polygons are stored in a simple file instead of the Nominatim database.
 # See: https://nominatim.org/release-docs/latest/admin/Import/
 # Notice:
@@ -74,7 +74,7 @@ IMPORT_WIKIPEDIA_RANKINGS="No"
 
 # Import external postcodes?
 # See: https://nominatim.org/release-docs/latest/admin/Import/
-# Here are postcodes the USA and GB (Great Britain)
+# These two are postcodes for the USA and GB (Great Britain)
 # POSTCODE_FILES="https://nominatim.org/data/gb_postcodes.csv.gz
 #                 https://nominatim.org/data/us_postcodes.csv.gz"
 POSTCODE_FILES=""
